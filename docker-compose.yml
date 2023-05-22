@@ -4,5 +4,12 @@ services:
   roles-api:
     build:
       context: .
+      dockerfile: Dockerfile
     ports:
       - '8080:8080'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+    restart: unless-stopped

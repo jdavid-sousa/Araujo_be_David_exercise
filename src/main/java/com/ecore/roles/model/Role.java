@@ -8,10 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -20,6 +17,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
 public class Role {
 
     @Id
@@ -28,7 +26,7 @@ public class Role {
     @Type(type = "uuid-char")
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
 }

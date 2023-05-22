@@ -1,6 +1,7 @@
 package com.ecore.roles.service;
 
 import com.ecore.roles.exception.ResourceNotFoundException;
+import com.ecore.roles.model.Membership;
 import com.ecore.roles.model.Role;
 import com.ecore.roles.repository.MembershipRepository;
 import com.ecore.roles.repository.RoleRepository;
@@ -9,16 +10,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.UUID;
 
-import static com.ecore.roles.utils.TestData.DEVELOPER_ROLE;
-import static com.ecore.roles.utils.TestData.UUID_1;
+import static com.ecore.roles.utils.TestData.*;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,8 +39,13 @@ class RolesServiceTest {
     @Mock
     private MembershipsService membershipsService;
 
+    @Mock
+    private TeamsService teamsService;
+
+    @Mock
+    private UsersService usersService;
     @Test
-    public void shouldCreateRole() {
+    void shouldCreateRole() {
         Role developerRole = DEVELOPER_ROLE();
         when(roleRepository.save(developerRole)).thenReturn(developerRole);
 
@@ -48,13 +56,13 @@ class RolesServiceTest {
     }
 
     @Test
-    public void shouldFailToCreateRoleWhenRoleIsNull() {
+    void shouldFailToCreateRoleWhenRoleIsNull() {
         assertThrows(NullPointerException.class,
                 () -> rolesService.CreateRole(null));
     }
 
     @Test
-    public void shouldReturnRoleWhenRoleIdExists() {
+    void shouldReturnRoleWhenRoleIdExists() {
         Role developerRole = DEVELOPER_ROLE();
         when(roleRepository.findById(developerRole.getId())).thenReturn(Optional.of(developerRole));
 
@@ -65,10 +73,30 @@ class RolesServiceTest {
     }
 
     @Test
-    public void shouldFailToGetRoleWhenRoleIdDoesNotExist() {
+    void shouldFailToGetRoleWhenRoleIdDoesNotExist() {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> rolesService.GetRole(UUID_1));
 
         assertEquals(format("Role %s not found", UUID_1), exception.getMessage());
+    }
+    @Test
+    void shouldReturnRoleByUserIdAndTeamId() {
+        Membership membership = DEFAULT_MEMBERSHIP();
+        when(membershipsService.findByUserIdAndTeamId(membership.getUserId(), membership.getTeamId())).thenReturn(membership);
+
+        Role role = rolesService.search(membership.getUserId(), membership.getTeamId());
+
+        assertNotNull(role);
+        assertEquals(membership.getRole(), role);
+    }
+
+    @Test
+    void shouldFailToReturnRoleWhenUserIrOrTeamIdDoesNotExist() {
+        UUID userId = UUID.randomUUID();
+        UUID teamId = UUID.randomUUID();
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            rolesService.search(userId, teamId);
+        });
     }
 }
