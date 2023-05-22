@@ -20,7 +20,6 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class Team {
 
-    @Id
     @JsonProperty
     private UUID id;
 

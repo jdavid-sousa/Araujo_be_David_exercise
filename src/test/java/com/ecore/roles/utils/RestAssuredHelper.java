@@ -30,6 +30,33 @@ public class RestAssuredHelper {
         return new EcoreValidatableResponse(validatableResponse);
     }
 
+    public static EcoreValidatableResponse getUsers() {
+        return sendRequest(when()
+                .get("/v1/users")
+                .then());
+    }
+
+    public static EcoreValidatableResponse getUserById(UUID userId) {
+        return sendRequest(given()
+                .pathParam("userId", userId)
+                .when()
+                .get("/v1/users/{userId}")
+                .then());
+    }
+
+    public static EcoreValidatableResponse getTeams() {
+        return sendRequest(when()
+                .get("/v1/teams")
+                .then());
+    }
+
+    public static EcoreValidatableResponse getTeamById(UUID teamId) {
+        return sendRequest(given()
+                .pathParam("teamId", teamId)
+                .when()
+                .get("/v1/teams/{teamId}")
+                .then());
+    }
     public static EcoreValidatableResponse createRole(Role role) {
         return sendRequest(givenNullableBody(RoleDto.fromModel(role))
                 .contentType(JSON)
@@ -87,7 +114,7 @@ public class RestAssuredHelper {
 
     public static class EcoreValidatableResponse {
 
-        ValidatableResponse validatableResponse;
+        private final ValidatableResponse validatableResponse;
 
         public EcoreValidatableResponse(ValidatableResponse validatableResponse) {
             this.validatableResponse = validatableResponse;
